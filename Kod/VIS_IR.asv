@@ -1,8 +1,0 @@
-clc; close all; clear all;
-listing = dir 'VIS/'
-IR = imread('IR/*.jpg');
-
-
-for i=1:size(fic,2)
-    imshow(IR);
-end
