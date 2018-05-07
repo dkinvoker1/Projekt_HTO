@@ -22,7 +22,7 @@ function varargout = VIS_IR_GUI(varargin)
 
 % Edit the above text to modify the response to help VIS_IR_GUI
 
-% Last Modified by GUIDE v2.5 07-May-2018 03:26:12
+% Last Modified by GUIDE v2.5 07-May-2018 01:42:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -88,8 +88,8 @@ function btnSeriaVIS_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global VIS 
-selpath = uigetdir(path);
-s = strcat(selpath,'\*.jpg');
+selpath = uigetdir(path)
+s = strcat(selpath,'\*.jpg')
 VIS = dir (s);
 VIS=struct2cell(VIS);
 VIS=VIS(1,:);
@@ -107,8 +107,8 @@ function btnSeriaIR_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global IR
-selpath = uigetdir(path);
-s = strcat(selpath,'\*.png');
+selpath = uigetdir(path)
+s = strcat(selpath,'\*.png')
 IR = dir (s);
 IR=struct2cell(IR);
 IR=IR(1,:);
@@ -126,7 +126,7 @@ set(handles.text2,'String', 'Wczytano seriê IR');
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    structure with handles and user data (see GUIDATA)
 % global VIS IR t_concord
-% set(handles.btnPunkty,'Visible','off');
+set(handles.btnPunkty,'Visible','off');
 % 
 % [movingPoints,fixedPoints] =cpselect(IR{1},VIS{1},'Wait',true);
 % save('Points.mat','movingPoints','fixedPoints')
@@ -149,9 +149,9 @@ function btnFuzja_Callback(hObject, eventdata, handles)
 % hObject    handle to btnFuzja (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global VIS IR mode t_concord IM_VIS IM_IR i max fused
-max=size(VIS,2);
-% max=1;
+global VIS IR mode t_concord IM_VIS IM_IR i max registered
+% max=size(VIS,2);
+max=2;
 h = waitbar(0,'Proszê czekaæ');
 for i=1:max
 % for i=1:2
@@ -167,13 +167,13 @@ for i=1:max
     end
     
     Rfixed = imref2d(size(IM_VIS{i}));
-    registered = imwarp(IM_IR{i},t_concord,'OutputView',Rfixed);
+    registered{i} = imwarp(IM_IR{i},t_concord,'OutputView',Rfixed);
     
-    fused{i} = imfuse(IM_VIS{i},registered,'blend');
+    registered{i} = imfuse(IM_VIS{i},registered{i},'blend');
     waitbar(i/max,h)
 end
 axes(handles.axes3);
-imshow(fused{1})
+imshowpair(IM_VIS{1},registered{1},'blend')
 
 close(h)
 set(handles.btnTyl,'Visible','on');
@@ -186,7 +186,7 @@ function btnTyl_Callback(hObject, eventdata, handles)
 % hObject    handle to btnTyl (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global IM_VIS IM_IR t_concord i fused
+global IM_VIS IM_IR t_concord i registered
 % set(handles.axes1,'Visible','off');
 % set(handles.text2,'String', 'Wykonywanie fuzji...');
 if (i-1<=0)
@@ -194,27 +194,31 @@ if (i-1<=0)
 else
     i = i-1;
 end
-
+h = waitbar(0,'Proszê czekaæ','windowstyle', 'modal');
 axes(handles.axes1);
 imshow(IM_VIS{i});
+waitbar(1/3,h)
 axes(handles.axes2);
 imshow(IM_IR{i});
+waitbar(2/3,h)
 
 % Rfixed = imref2d(size(IM_VIS{i}));
-% fused = imwarp(IM_IR{i},t_concord,'OutputView',Rfixed);
-% obj = imshowpair(IM_VIS{i},fused,'blend')
+% registered = imwarp(IM_IR{i},t_concord,'OutputView',Rfixed);
+% obj = imshowpair(IM_VIS{i},registered,'blend')
 axes(handles.axes3);
-imshow(fused{i})
+imshowpair(IM_VIS{i},registered{i},'blend')
+waitbar(3/3,h)
 % axes(handles.axes2);
 % imshow(obj);
 set(handles.text2,'String', 'Wynik fuzji');
+close(h)
 
 % --- Executes on button press in btnPrzod.
 function btnPrzod_Callback(hObject, eventdata, handles)
 % hObject    handle to btnPrzod (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global IM_VIS IM_IR t_concord i max fused
+global IM_VIS IM_IR t_concord i max registered
 % set(handles.axes1,'Visible','off');
 % set(handles.text2,'String', 'Wykonywanie fuzji...');
 if (i+1>=max)
@@ -222,17 +226,21 @@ if (i+1>=max)
 else
     i = i+1;
 end
-
+h = waitbar(0,'Proszê czekaæ','windowstyle', 'modal');
 axes(handles.axes1);
 imshow(IM_VIS{i});
+waitbar(1/3,h)
 axes(handles.axes2);
 imshow(IM_IR{i});
+waitbar(2/3,h)
 
 % Rfixed = imref2d(size(IM_VIS{i}));
-% fused = imwarp(IM_IR{i},t_concord,'OutputView',Rfixed);
-% obj = imshowpair(IM_VIS{i},fused,'blend')
+% registered = imwarp(IM_IR{i},t_concord,'OutputView',Rfixed);
+% obj = imshowpair(IM_VIS{i},registered,'blend')
 axes(handles.axes3);
-imshow(fused{i})
+imshowpair(IM_VIS{i},registered{i},'blend')
+waitbar(3/3,h)
 % axes(handles.axes2);
 % imshow(obj);
 set(handles.text2,'String', 'Wynik fuzji');
+close(h)
