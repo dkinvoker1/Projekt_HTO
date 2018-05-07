@@ -1,17 +1,20 @@
 clc; close all; clear all;
 
-% mode='vis->ir';
-mode='ir->vis';
+mode='vis->ir';
+% mode='ir->vis';
 
-VIS = dir ('VIS/*.jpg');
+VIS = dir ('Nowe/VIS/*.jpg');
 VIS=struct2cell(VIS);
 VIS=VIS(1,:);
-VIS= strcat('VIS/',VIS);
+VIS= strcat('Nowe/VIS/',VIS);
 
-IR = dir ('IR/*.png');
+IR = dir ('Nowe/IR/*.png');
 IR=struct2cell(IR);
 IR=IR(1,:);
-IR= strcat('IR/',IR);
+IR= strcat('Nowe/IR/',IR);
+
+load('Points.mat')
+t_concord = fitgeotrans(movingPoints,fixedPoints,'projective');
 
 for i=1:size(VIS,2)
 % for i=1:1
@@ -31,12 +34,11 @@ for i=1:size(VIS,2)
     imshow(IM_VIS{i});
     subplot(1,2,2)
     imshow(IM_IR{i});
+    
+    Rfixed = imref2d(size(IM_VIS{i}));
+    registered = imwarp(IM_IR{i},t_concord,'OutputView',Rfixed);
+
+    figure
+    imshowpair(IM_VIS{i},registered,'blend')
 end
-load('Points.mat')
 
-t_concord = fitgeotrans(movingPoints,fixedPoints,'projective');
-Rfixed = imref2d(size(IM_VIS{19}));
-registered = imwarp(IM_IR{19},t_concord,'OutputView',Rfixed);
-
-figure
-imshowpair(IM_VIS{19},registered,'blend')
